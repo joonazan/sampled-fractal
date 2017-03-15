@@ -10,8 +10,34 @@ float rand(int iters){
     return sample.x + sample.y / 256;
 }
 
-bool sphere(vec3 x) {
-	return length(x) < 1;
+void sphere_fold(inout vec3 x, vec3 center, float radius) {
+	vec3 dx = x - center;
+	x = center + (radius * radius / length(dx)) * normalize(dx);
+}
+
+//http://archive.bridgesmathart.org/2016/bridges2016-367.pdf
+
+vec3 spheres[6];
+
+bool try_all_spheres(inout vec3 x) {
+	for (int i = 0; i < 6; i++) {
+		vec3 s = spheres[i];
+		if (length(s - x) < 1) {
+			sphere_fold(x, s, 1);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool fractal(vec3 x) {
+	for (int i = 0; i < 7; i++) {
+		if(!try_all_spheres(x)){
+			return false;
+		}
+	}
+
+	return true;
 }
 
 vec2 viewport;
@@ -22,16 +48,23 @@ vec3 calc_ray(vec2 pixel) {
 }
 
 void main() {
+	spheres[0] = vec3(-sqrt(2), 0, 0);
+	spheres[1] = vec3(sqrt(2), 0, 0);
+	spheres[2] = vec3(0, -sqrt(2), 0);
+	spheres[3] = vec3(0, sqrt(2), 0);
+	spheres[4] = vec3(0, 0, -sqrt(2));
+	spheres[5] = vec3(0, 0, sqrt(2));
+
 	viewport = vec2(500, 500);
 	vec3 ray = calc_ray(gl_FragCoord.xy);
 
-	vec3 start = vec3(0, 0, -4);
-	float maxdist = 20;
+	vec3 start = vec3(-0.05, -0.5, -1);
+	float maxdist = 2;
 
 	for (int i = 0; i < 1000; i++) {
 		float dist = maxdist * rand(i);
 		vec3 sample_pos = start + dist*ray;
-		if (sphere(sample_pos)) {
+		if (fractal(sample_pos)) {
 			maxdist = dist;
 		}
 	}

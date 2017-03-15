@@ -16,7 +16,6 @@ fn main() {
 	let raw_img = glium::texture::RawImage2d::from_raw_rgba(data, (512, 512));
 
 	use glium::texture::texture2d::Texture2d;
-	println!("{}, {}", raw_img.width, raw_img.height);
 	let noise_texture = Texture2d::new(&display, raw_img).unwrap();
 
 	let mut program = load_shaders(&display);
@@ -25,7 +24,7 @@ fn main() {
 	struct DatalessVertex{a:f32}
 	implement_vertex!(DatalessVertex, a);
 	
-	let one_vertex_vbo: glium::VertexBuffer<DatalessVertex> = 
+	let one_vertex_vbo: glium::VertexBuffer<DatalessVertex> =
 		glium::VertexBuffer::empty_immutable(&display, 1).unwrap();
 
 	loop {
